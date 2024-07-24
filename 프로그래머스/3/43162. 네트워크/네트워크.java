@@ -1,28 +1,40 @@
-import java.util.Arrays;
 class Solution {
-    static int count=0;
-    static int col=0;
+    boolean[] visited;
+    int answer = 0;
+    int[][] map;
+    int size;
     public int solution(int n, int[][] computers) {
-        col=n;
-        boolean[] visit = new boolean[n];
-        Arrays.fill(visit,false);
+        visited=new boolean[n];
+        map=new int[n][n];
+        size=n;
         for(int i=0; i<n; i++){
-            if(visit[i]==false){
-                
-                bfs(computers,visit,i);
-                
+            for(int j=0; j<n; j++){
+                if(i==j) map[i][j]=0;
+                else{map[i][j]=computers[i][j];}
             }
         }
-        return n-count;
+        for(int i=0; i<n; i++){
+            if(!visited[i]){
+                dfs(i);
+                answer++;
+            }
+            
+        }
+        
+        
+        return answer;
     }
-    void bfs(int[][] computers ,boolean[] visit, int i){
-        visit[i]=true;
-        for(int j=0; j<col; j++){
-            if(i!=j && computers[i][j]==1&&visit[j]==false){
-                count++;
-                bfs(computers,visit,j);
+    void dfs(int k){
+        
+            int count=0;
+            for(int i=0; i<size; i++){
+                if(map[k][i]==1 && !visited[i]){
+                    visited[k]=true;
+                    dfs(i);
+                }
+                else{count++;}
             }
-        }
+            if(count==size) visited[k]=true;
         
     }
 }
