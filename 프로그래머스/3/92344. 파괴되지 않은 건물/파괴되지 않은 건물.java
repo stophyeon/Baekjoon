@@ -1,48 +1,41 @@
 class Solution {
-    
+    int[][] map;
     public int solution(int[][] board, int[][] skill) {
         int answer = 0;
-        int n = board.length;
-        int m = board[0].length;
-        int[][] prefix = new int[n+1][m+1];
-        
-        //skill 적용
+        map= new int[board.length+1][board[0].length+1];
         for(int[] s : skill){
+            //공격
             if(s[0]==1){
-                prefix[s[1]][s[2]]+=-1*s[5];
-                prefix[s[1]][s[4]+1]+= s[5];
-                prefix[s[3]+1][s[2]]+= s[5];
-                prefix[s[3]+1][s[4]+1]+= -1*s[5];
+                map[s[1]][s[2]]+=-1*s[5];
+                map[s[1]][s[4]+1]+=s[5];
+                map[s[3]+1][s[2]]+=s[5];
+                map[s[3]+1][s[4]+1]+=-1*s[5];
             }
+            //회복
             else{
-                prefix[s[1]][s[2]]+=s[5];
-                prefix[s[3]+1][s[2]]+= -1*s[5];
-                prefix[s[1]][s[4]+1]+= -1*s[5];
-                prefix[s[3]+1][s[4]+1]+=s[5];
+                map[s[1]][s[2]]+=s[5];
+                map[s[1]][s[4]+1]+=-1*s[5];
+                map[s[3]+1][s[2]]+=-1*s[5];
+                map[s[3]+1][s[4]+1]+=s[5];
             }
         }
-        //누적합
-        for (int j = 0; j < m; j++) {
-            for (int i = 1; i < n; i++) {
-                prefix[i][j] += prefix[i - 1][j];
+        for(int j=0; j<board[0].length+1; j++){
+            for(int i=1; i<board.length+1; i++){
+                map[i][j]+=map[i-1][j];
             }
         }
-
-        for (int i = 0; i < n; i++) {
-            for (int j = 1; j < m; j++) {
-                prefix[i][j] += prefix[i][j - 1];
+        for(int i=0; i<board.length+1; i++){
+            for(int j=1; j<board[0].length+1; j++){
+                map[i][j]+=map[i][j-1];
             }
         }
-        //파괴된 건물 개수 카운팅
-        for(int i=0; i<n; i++){
-            for(int j=0; j<m; j++){
-                board[i][j]+=prefix[i][j];
+        
+        for(int i=0; i<board.length; i++){
+            for(int j=0; j<board[0].length; j++){
+                board[i][j]+=map[i][j];
                 if(board[i][j]>0) answer++;
-                //System.out.print(board[i][j]);
             }
-            //System.out.println("");
         }
         return answer;
     }
-    
 }
