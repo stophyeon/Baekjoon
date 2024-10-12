@@ -1,44 +1,89 @@
 import java.util.*;
+
 class Solution {
-    class State{
-        private int alp;
-        private int cop;
-        private int time;
-        
-        public State(int alp,int cop, int time){
-            this.alp=alp;
-            this.cop=cop;
-            this.time=time;      
-        }
-    }
-    
     public int solution(int alp, int cop, int[][] problems) {
         int answer = 0;
-        int maxAlp =0;
-        int maxCop =0;
-        for(int[] p : problems){
-            if(maxAlp<p[0]) maxAlp=p[0];
-            if(maxCop<p[1]) maxCop=p[1];
+        int maxAlp = 0, maxCop = 0;
+        for (int[] p : problems) {
+            maxAlp = Math.max(p[0], maxAlp);
+            maxCop = Math.max(p[1], maxCop);
         }
-        alp=Math.min(maxAlp,alp);
-        cop=Math.min(maxCop,cop);
-        boolean[][] visited = new boolean[maxAlp+1][maxCop+1];
-        PriorityQueue<State> pq = new PriorityQueue<>((s1,s2)->s1.time-s2.time);
-        pq.add(new State(alp,cop,0));
         
-        while(!pq.isEmpty()){
-            State s = pq.poll();
-            if(visited[s.alp][s.cop]){continue;}
-            visited[s.alp][s.cop]=true;
-            if(s.alp>=maxAlp && s.cop>=maxCop){return s.time;}
-            for(int[] p : problems){
-                if(s.alp>=p[0]&&s.cop>=p[1]){
-                    pq.add(new State(Math.min(maxAlp,s.alp+p[2]),Math.min(maxCop,s.cop+p[3]),s.time+p[4]));
+        alp = Math.min(alp, maxAlp);
+        cop = Math.min(cop, maxCop);
+        
+        int[][] dp = new int[maxAlp + 1][maxCop + 1];
+        for (int al = alp; al <= maxAlp; al++) {
+            for (int co = cop; co <= maxCop; co++) {
+                if (co == cop) {
+                    dp[al][co] = al;
+                } else if (al == alp) {
+                    dp[al][co] = co;
+                } else {
+                    dp[al][co] = Math.min(dp[al - 1][co], dp[al][co - 1]) + 1;
                 }
             }
-            pq.add(new State(Math.min(maxAlp,s.alp+1),Math.min(maxCop,s.cop),s.time+1));
-            pq.add(new State(Math.min(maxAlp,s.alp),Math.min(maxCop,s.cop+1),s.time+1));   
         }
-        return 0;
+        // System.out.println(dp[maxAlp][maxCop]);
+        
+        Queue<Point> que = new LinkedList<>();
+        que.offer(new Point(alp, cop, 0));
+        
+        while (!que.isEmpty()) {
+            Point point = que.poll();
+            
+            if (dp[point.al][point.co] < point.cost) {
+                continue;
+            }
+            
+            // System.out.println(point.al + " " + point.co);
+            
+            // alpReq, copReq, alpRwd, copRwd, cost
+            int alpReq, copReq, alpRwd, copRwd, cost;
+            int nextAlp, nextCop;
+            for (int[] p : problems) {
+                alpReq = p[0];
+                copReq = p[1];
+                alpRwd = p[2];
+                copRwd = p[3];
+                cost = p[4];
+                nextAlp = Math.min(maxAlp, point.al + alpRwd);
+                nextCop = Math.min(maxCop, point.co + copRwd);
+                
+                if (!(alpReq <= point.al && copReq <= point.co) ||
+                   dp[nextAlp][nextCop] <= point.cost + cost) {
+                    continue;
+                }
+                
+                dp[nextAlp][nextCop] = point.cost + cost;
+                que.offer(new Point(nextAlp, nextCop, point.cost + cost));
+            }
+            
+            nextAlp = Math.min(maxAlp, point.al + 1);
+            nextCop = Math.min(maxCop, point.co + 1);
+            if (dp[nextAlp][point.co] > point.cost + 1) {
+                dp[nextAlp][point.co] = point.cost + 1;
+                que.offer(new Point(nextAlp, point.co, point.cost + 1));
+            }
+            
+            if (dp[point.al][nextCop] > point.cost + 1) {
+                dp[point.al][nextCop] = point.cost + 1;
+                que.offer(new Point(point.al, nextCop, point.cost + 1));
+            }
+        }
+        
+        return dp[maxAlp][maxCop];
+    }
+}
+
+class Point {
+    int al;
+    int co;
+    int cost;
+    
+    public Point(int al, int co, int cost) {
+        this.al = al;
+        this.co = co;
+        this.cost = cost;
     }
 }
