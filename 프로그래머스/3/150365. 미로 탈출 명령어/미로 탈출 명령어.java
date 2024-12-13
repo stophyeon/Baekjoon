@@ -1,40 +1,60 @@
 import java.util.*;
 class Solution {
-    String answer = "";
-    int N, M;
-    int K, R, C;
-    int[] dr = {1,0,0,-1};
-    int[] dc = {0,-1,1,0};
-    String[] p = {"d","l","r","u"};
     
+    public int[][] map;
+    public int[] dr = {1,0,0,-1};
+    public int[] dc = {0,-1,1,0};
+    public String[] pd = {"d","l","r","u"};
+    public class Node{
+        int r;
+        int c;
+        String path;
+        int d;
+        public Node(int r, int c,String path,int d){
+            this.r=r;
+            this.c=c;
+            this.d=d;
+            this.path=path;
+        }
+    }
+    public String answer="";
+    public int N;
+    public int M;
+    public boolean stop=false;
     public String solution(int n, int m, int x, int y, int r, int c, int k) {
+        map=new int[n][m];
         N=n;
         M=m;
-        R=r;
-        C=c;
-        K=k;
-        dfs(0, x, y,"");
+        map[r-1][c-1]=1;
+        int er =r-1;
+        int ec=c-1;
+        int dis = Math.abs(x-r)+Math.abs(y-c);
+        //if((k-dis)%2==1) return "impossible";
+        
+        dfs(x-1,y-1,0,er,ec,"",k);
         if(answer.equals("")) return "impossible";
         return answer;
     }
-    public void dfs(int depth, int r, int c, String path){
+    
+    public boolean inRange(int r, int c){
+        return r>=0&&r<N&&c>=0&&c<M;
+    }
+    
+    public void dfs(int r, int c, int cnt, int er, int ec, String path,int k){
         if(!answer.equals("")) return;
-        if(depth==K){
-            if(r==R && c==C) answer=path;
+        if(cnt==k&&r==er&&c==ec) {
+            answer=path;
             return;
         }
-        if(Math.abs(R-r)+Math.abs(C-c)>K-depth) return;
-        if((K-depth-(Math.abs(R-r)+Math.abs(C-c)))%2!=0) return;
+        int d = Math.abs(r-er)+Math.abs(c-ec);
+        if(d>k-cnt) return;
+        if((k-cnt-d)%2!=0) return;
         for(int i=0; i<4; i++){
             int nr = r+dr[i];
             int nc = c+dc[i];
             if(!inRange(nr,nc)) continue;
-            dfs(depth+1, nr,nc,path+p[i]);
+            
+            dfs(nr,nc,cnt+1,er,ec,path+pd[i],k);
         }
-    }
-    
-    //u-0, d-1, l-2, r-3
-    public boolean inRange(int r, int c){
-        return r>=1&&r<N+1&&c>=1&&c<M+1;
     }
 }
