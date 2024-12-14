@@ -1,72 +1,93 @@
-import java.util.LinkedList;
-import java.util.Queue;
-
+import java.util.*;
 class Solution {
-    static String[][] MIRO;
-    static int[] dx = {-1, 1, 0, 0};
-    static int[] dy = {0, 0 , -1, 1};
-    
+    int n;
+    int m;
+    int[][] map;
+    public class Node{
+        int r;
+        int c;
+        int time;
+        public Node(int r, int c, int time){
+            this.r=r;
+            this.c=c;
+            this.time=time;
+        }
+    }
+    int[] dr = {-1,1,0,0};
+    int[] dc = {0,0,-1,1};
     public int solution(String[] maps) {
-        MIRO = new String[maps.length][maps[0].length()];
-        int[] start = new int[2];
-        int[] labor = new int[2];
         
-        for(int i = 0; i<maps.length; i++) {
-            String[] tmp = maps[i].split("");
-            
-            for(int j = 0; j<tmp.length; j++) {
-                MIRO[i][j] = tmp[j];
-                
-                if (MIRO[i][j].equals("S")) {
-                    start = new int[]{i, j};
-                }
-    
-                if (MIRO[i][j].equals("L")) {
-                    labor = new int[]{i, j};
-                }
+        n = maps.length;
+        m = maps[0].length();
+        map = new int[n][m];
+        int sr=0;
+        int sc=0;
+        int lr=0;
+        int lc=0;
+        for(int i=0; i<n; i++){
+            for(int j=0; j<m; j++){
+                if(maps[i].charAt(j)=='S') {sr=i; sc=j;}
+                else if(maps[i].charAt(j)=='E') map[i][j]=3;
+                else if(maps[i].charAt(j)=='L') {map[i][j]=2;lr=i;lc=j;}
+                else if(maps[i].charAt(j)=='X') map[i][j]=1;
             }
         }
+        // for(int i=0; i<n; i++){
+        //     for(int j=0; j<m; j++){
+        //         System.out.print(map[i][j]+" ");
+        //     }
+        //     System.out.println();
+        // }
         
-        int result = bfs(start, "L");
-        int result2 = bfs(labor, "E");
-        
-        if (result == -1 || result2 == -1)
-            return -1;
-        
-        return result + result2;
+        int l = findLever(sr,sc);
+        if(l==0) return -1;
+        int e = findEscape(lr,lc);
+        if(e==0) return -1;
+        return l+e;
+    }
+    public int findLever(int sr, int sc){
+        int total=0;
+        boolean[][] visited = new boolean[n][m];
+        Queue<Node> q = new LinkedList<>();
+        q.add(new Node(sr,sc,0));
+        visited[sr][sc]=true;
+        while(!q.isEmpty()){
+            Node nd = q.poll();
+            if(map[nd.r][nd.c]==2) {total=nd.time;break;} 
+            for(int i=0; i<4; i++){
+                int nr = nd.r+dr[i];
+                int nc = nd.c+dc[i];
+                if(!inRange(nr,nc)||visited[nr][nc]) continue;
+                if(map[nr][nc]==1) continue;
+                q.add(new Node(nr,nc,nd.time+1));
+                visited[nr][nc]=true;
+            }
+        }
+        return total;
     }
     
-    public int bfs(int[] start, String target) {
-        Queue<int[]> queue = new LinkedList<>();
-        queue.add(new int[]{start[0], start[1], 0});
-        
-        boolean[][] visited = new boolean[MIRO.length][MIRO[0].length];
-    
-        while(!queue.isEmpty()) {
-            int x = queue.peek()[0];
-            int y = queue.peek()[1];
-            int count = queue.peek()[2];
-            visited[x][y] = true;
-            
-            if (MIRO[x][y].equals(target)) {
-                return count;
-            }
-            
-            queue.poll();
-        
-            for(int i = 0; i<4; i++) {
-                int nx = x + dx[i];
-                int ny = y + dy[i];
-            
-                if (nx >= 0 && nx < MIRO.length && ny >= 0 && ny < MIRO[0].length && !visited[nx][ny]) {
-                    if (!MIRO[nx][ny].equals("X")) {
-                        visited[nx][ny] = true;
-                        queue.add(new int[]{nx, ny, count+1});
-                    }
-                }
+    public int findEscape(int sr, int sc){
+        int total=0;
+        boolean[][] visited = new boolean[n][m];
+        Queue<Node> q = new LinkedList<>();
+        q.add(new Node(sr,sc,0));
+        visited[sr][sc]=true;
+        while(!q.isEmpty()){
+            Node nd = q.poll();
+            if(map[nd.r][nd.c]==3) {total=nd.time; break;} 
+            for(int i=0; i<4; i++){
+                int nr = nd.r+dr[i];
+                int nc = nd.c+dc[i];
+                if(!inRange(nr,nc)||visited[nr][nc]) continue;
+                if(map[nr][nc]==1) continue;
+                q.add(new Node(nr,nc,nd.time+1));
+                visited[nr][nc]=true;
             }
         }
-        
-        return -1;
+        return total;
+    }
+    
+    public boolean inRange(int r, int c){
+        return r>=0&&r<n&&c>=0&&c<m;
     }
 }
