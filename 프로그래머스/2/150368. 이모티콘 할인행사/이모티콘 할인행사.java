@@ -1,44 +1,67 @@
 import java.util.*;
 class Solution {
-    List<int[]> res = new ArrayList<>();
-    int[][] user;
-    int[] e;
-    int len;
-    public int[] solution(int[][] users, int[] emoticons) {
-        user=users;
-        e=emoticons;
-        len=emoticons.length;
-        for(int i=10; i<=40; i+=10){
-            dfs(0,i,new int[users.length]);
+    PriorityQueue<int[]> pq = new PriorityQueue<>((e1,e2)->{
+        if(e1[0]==e2[0]){
+            return e2[1]-e1[1];
         }
-        Collections.sort(res,(r1,r2)->{
-            if(r1[0]==r2[0]){
-                return r2[1]-r1[1];
+        return e2[0]-e1[0];
+    });
+    int n;
+    int m;
+    int[][] user;
+    int[] em;
+    public int[] solution(int[][] users, int[] emoticons) {
+        n=users.length;
+        m=emoticons.length;
+        user=users;
+        em=emoticons;
+        //이모티콘 할인율 경우의 수
+        boolean[] visited = new boolean[m];
+        for(int i=0; i<m; i++){
+            visited[i]=true;
+            int[] per = new int[m];
+            for(int j=10; j<=40; j+=10){
+                per[i]=j;
+                backTracking(1,j,visited,per);    
             }
-            return r2[0]-r1[0];
-        });
-        return res.get(0);
+        }
+        //해당 경우의 수에 대한 사용자 구매,구독 연산
+        
+        return pq.poll();
     }
-    public void dfs(int depth, int per, int[] total){
-        if(depth==len){
-            int plus=0;
-            int t=0;
-            for(int i=0; i<user.length; i++){
-                if(total[i]>=user[i][1]) {plus++;}
-                else{t+=total[i];}
-            }
-            res.add(new int[]{plus,t});
+    public void backTracking(int depth,int per,boolean[] visited,int[] percent){
+        if(depth==m){
+            cal(percent);
             return;
         }
-        int price=(e[depth]/100)*(100-per);
-        for(int i=0; i<user.length; i++){
-            if(user[i][0]<=per) total[i]+=price;
-            //System.out.print(total[i]);
-            //System.out.print(",");
+        for(int i=depth; i<m; i++){
+            if(visited[i]) continue;
+            visited[i]=true;
+            for(int j=10; j<=40; j+=10){
+                percent[i]=j;
+                backTracking(depth+1,j,visited,percent);
+            }
+            visited[i]=false;
         }
-        System.out.println();
-        for(int i=10; i<=40; i+=10){
-            dfs(depth+1,i,Arrays.copyOf(total,total.length));
+    }
+    
+    public void cal(int[] per){
+        int plus=0;
+        int total=0;
+        for(int i=0; i<n; i++){
+            int[] u = user[i];
+            int res=0;
+            for(int j=0; j<m; j++){
+                if(per[j]>=u[0]){
+                    res+=(em[j]/100)*(100-per[j]);
+                }
+            }
+            if(res>=u[1]){
+                res=0;
+                plus++;
+            }
+            total+=res;
         }
+        pq.add(new int[]{plus,total});
     }
 }
