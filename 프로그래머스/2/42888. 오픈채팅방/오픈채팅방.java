@@ -1,32 +1,25 @@
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 class Solution {
-    HashMap<String,String> map = new HashMap<>();
     public String[] solution(String[] record) {
-        int n = record.length;
-        
-        List<String> state = new ArrayList<>();
-        
-        List<String> uid = new ArrayList<>();
-        for(int i =0; i<record.length; i++){
-            String[] log = record[i].split(" ");
-            if(!log[0].equals("Leave")){map.put(log[1],log[2]);}
-            if(!log[0].equals("Change")){uid.add(log[1]);state.add(log[0]);}
+        List<String> ans = new ArrayList<>();
+        HashMap<String,String> dic = new HashMap<>();
+        for(String r : record){
+            String[] str = r.split(" ");
+            if(!str[0].equals("Leave")){
+                dic.put(str[1],str[2]);
+            }
             
         }
-        String[] st = new String[state.size()];
-        for(int i=0; i<state.size(); i++){
-            if(state.get(i).equals("Enter")){st[i]="들어왔습니다.";}
-            if(state.get(i).equals("Leave")){st[i]="나갔습니다.";}
+        for(String r : record){
+            String[] str = r.split(" ");
+            if(str[0].equals("Enter")) {
+                ans.add(dic.get(str[1])+"님이 들어왔습니다.");
+            }
+            else if(str[0].equals("Leave")){
+                ans.add(dic.get(str[1])+"님이 나갔습니다.");
+            }
         }
-        String[] answer = new String[state.size()];
         
-        for(int i =0; i<uid.size(); i++){
-             StringBuilder sb = new StringBuilder();
-             sb.append(map.get(uid.get(i))).append("님이 ").append(st[i]);
-             answer[i]=sb.toString();
-        }
-        return answer;
+        return ans.toArray(new String[ans.size()]);
     }
 }
