@@ -1,80 +1,89 @@
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import java.util.*;
 class Solution {
-
+    List<String> answer = new ArrayList<>();
+    String[] m;
+    String[] or;
+    int max=1;
+    List<String> ans = new ArrayList<>();
     public String[] solution(String[] orders, int[] course) {
-        Map<String, Integer> map = new HashMap<>();
-        for (String order : orders) {
-            order = sortString(order);
-            dfs(new boolean[order.length()], order, 0, course, map);
-        }
-        List<String> keySetList = new ArrayList<>(map.keySet());
-        for (int i = 0; i < keySetList.size(); i++) {
-            String key = keySetList.get(i);
-            if (map.get(key) < 2) {
-                keySetList.remove(i--);
-                continue;
+        or= orders;
+        //단품 메뉴 종류 저장
+        List<String> menu = new ArrayList<>();
+        for(String ord : orders){
+            String[] order = ord.split("");
+            for(String o : order){
+                if(menu.contains(o)) continue;
+                menu.add(o);
             }
-            for (int courseLength : course) {
-                if (key.length() != courseLength) {
-                    continue;
-                }
-                for (int j = 0; j < i; j++) {
-                    String preKey = keySetList.get(j);
-                    if (key.length() != preKey.length()) {
-                        continue;
-                    }
-                    if (map.get(key) < map.get(preKey)) {
-                        keySetList.remove(i--);
-                        break;
-                    } else if (map.get(key) > map.get(preKey)) {
-                        keySetList.remove(j--);
-                        i--;
-                    }
-                }
-            }
+            
         }
-        Collections.sort(keySetList);
-        return keySetList.toArray(new String[0]);
+        Collections.sort(menu);
+        m = menu.toArray(new String[menu.size()]);
+        // for(int i=0; i<m.length; i++){
+        //     System.out.print(m[i]+",");
+        // }
+        
+        for(int c : course){
+            //course 개수에 맞게 조합생성
+            //생성한 조합 중 2번이상인 최대개수 찾기
+            max=1;
+            ans.clear();
+            dfs(c,new ArrayList<>(),0 );
+            for(int i=0; i<ans.size(); i++){
+                answer.add(ans.get(i));
+            }
+            
+        }
+        Collections.sort(answer);
+        return answer.toArray(new String[answer.size()]);
     }
-
-    public void dfs(boolean[] visited, String order, int depth, int[] course,
-        Map<String, Integer> map) {
-        if (depth == order.length()) {
-            String menu = "";
-            for (int i = 0; i < order.length(); i++) {
-                if (visited[i]) {
-                    menu += order.charAt(i);
-                }
-            }
-            if (menu.length() < 2) {
-                return;
-            }
-            for (int courseLength : course) {
-                if (menu.length() == courseLength) {
-                    if (!map.containsKey(menu)) {
-                        map.put(menu, 1);
-                    } else {
-                        map.replace(menu, map.get(menu) + 1);
-                    }
-                }
-            }
-        } else {
-            visited[depth] = true;
-            dfs(visited, order, depth + 1, course, map);
-            visited[depth] = false;
-            dfs(visited, order, depth + 1, course, map);
+    
+    public void dfs(int depth,List<String> course,int start ){
+        if(course.size()==depth){
+            // for(int i=0; i<course.size(); i++){
+            //     System.out.print(course.get(i)+",");
+            // }
+            
+            checkCnt(course);
+            return;
         }
+        for(int i=start; i<m.length; i++){
+            
+            course.add(m[i]);
+            
+            dfs(depth, course,i+1);
+            
+            course.remove(course.size()-1);
+        }
+        
     }
-
-    public String sortString(String string) {
-        char[] charArray = string.toCharArray();
-        Arrays.sort(charArray);
-        return String.valueOf(charArray);
+    
+    public void checkCnt(List<String> course){
+        int cnt=0;
+        
+        for(int i=0; i< or.length; i++){
+            boolean check = true;
+            for(int j=0; j<course.size(); j++){
+                if(or[i].indexOf(course.get(j))==-1) {check=false; break;}
+            }
+            if(check) cnt++;
+        }
+        //System.out.println(cnt);
+        if(cnt==max&&cnt>1){
+           String a="";
+            for(int i=0; i<course.size(); i++){
+                a+=course.get(i);
+            }
+            ans.add(a);
+        }
+        if(cnt>max&&cnt>1){
+            max=cnt;
+            String a="";
+            ans.clear();
+            for(int i=0; i<course.size(); i++){
+                a+=course.get(i);
+            }
+            ans.add(a);
+        }
     }
 }
