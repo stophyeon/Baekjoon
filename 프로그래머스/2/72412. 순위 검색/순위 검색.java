@@ -1,56 +1,55 @@
-import java.util.HashMap;
-import java.util.Collections;
-import java.util.ArrayList;
+import java.util.*;
 class Solution {
-    HashMap<String,ArrayList<Integer>> map = new HashMap<>();
+    HashMap<String, List<Integer>> map = new HashMap<>();
     public int[] solution(String[] info, String[] query) {
         int[] answer = new int[query.length];
-        for(String in : info){
-            String[] arr = in.split(" ");
-            dfs(arr,"",0);
+        for(int i=0; i<info.length; i++){
+            String[] p=info[i].split(" ");
+            dfs(p,0, "");
         }
-        for(String key : map.keySet()){
-            Collections.sort(map.get(key));
+        
+        for(String k : map.keySet()){
+            Collections.sort(map.get(k));
         }
+        
         for(int i=0; i<query.length; i++){
-            String[] str = query[i].split(" and ");
-            String q = str[0]+str[1]+str[2]+str[3].split(" ")[0];
-            int score = Integer.parseInt(str[3].split(" ")[1]);
+            String[] q = query[i].split(" and ");
+            String[] x = q[3].split(" ");
+            q[3] = x[0];
+            int score = Integer.valueOf(x[1]);
+            String key = q[0]+q[1]+q[2]+q[3];
+            if(!map.containsKey(key)) continue;
+            List<Integer> list = map.get(key);
+            //탐색 알고리즘
             
-            answer[i]=count(q,score);
+            int left = 0, right = list.size();
+            while (left < right) {
+                int mid = (left + right) / 2;
+                if (list.get(mid) >= score) right = mid;
+                else left = mid + 1;
+            }
+            answer[i] = list.size() - left;
         }
         return answer;
     }
-    public void dfs(String[] arr, String com, int d){
-        if(d==4){
-            if(map.containsKey(com)){
-                map.get(com).add(Integer.parseInt(arr[4]));
-                
+    
+    public void dfs(String[] p,int depth,String res){
+        if(depth == 4){
+            int score = Integer.valueOf(p[4]);
+            if(map.containsKey(res)){
+                map.get(res).add(score);
             }
             else{
-                ArrayList<Integer> list = new ArrayList<>();
-                list.add(Integer.parseInt(arr[4]));
-                map.put(com,list);
+                List<Integer> list = new ArrayList<>();
+                list.add(score);
+                map.put(res,list);
             }
             return;
         }
-        dfs(arr,com+arr[d],d+1);
-        dfs(arr,com+"-",d+1);
-    }
-    
-    public int count(String query, int score){
-        if(map.get(query)==null){return 0;}
-        ArrayList<Integer> list = map.get(query);
+        String s1 = res+p[depth];
+        String s2 = res+"-";
         
-        int s=0; 
-        int e = list.size()-1;
-        while(s<=e){
-            int mid = (s+e)/2;
-            if(score>list.get(mid)){s=mid+1;}
-            else{e=mid-1;}
-        }
-        
-        
-        return list.size()-s;
+        dfs(p,depth+1,s1);
+        dfs(p,depth+1,s2);
     }
 }
