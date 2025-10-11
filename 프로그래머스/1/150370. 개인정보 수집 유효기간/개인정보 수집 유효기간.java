@@ -1,37 +1,29 @@
 import java.util.*;
+
 class Solution {
-    int[] now = new int[3];
     public int[] solution(String today, String[] terms, String[] privacies) {
-        now = toInt(today.split("\\."));
-        ArrayList<Integer> ans = new ArrayList<>();
-        HashMap<String, Integer> map = new HashMap<>();
+        List<Integer> ans = new ArrayList<>();
+        String[] now = today.split("\\.");
+        //연,월,일을 일수로 변경
+        int day = Integer.valueOf(now[0])*12*28+Integer.valueOf(now[1])*28+Integer.valueOf(now[2]);
+            
+        HashMap<String,Integer> type = new HashMap<>();
+        //약관 종류별 일수로 변환해 유효기간저장
         for(String term : terms){
             String[] t = term.split(" ");
-            map.put(t[0],Integer.parseInt(t[1]));
+            type.put(t[0],Integer.valueOf(t[1])*28);
         }
-        System.out.println(map.size());
-        for(int i=0; i<privacies.length; i++){
-            String[] s = privacies[i].split(" ");
-            int[] until = toInt(s[0].split("\\."));
-            if(cal(until,map.get(s[1]))){
-                ans.add(i+1);
-            }
+        int idx=1;
+        for(String privacy : privacies){
+            String[] p = privacy.split(" ");
+            String[] date = p[0].split("\\.");
+            int cal = Integer.valueOf(date[0])*12*28+Integer.valueOf(date[1])*28+Integer.valueOf(date[2]);
+            cal+=type.get(p[1]);
+            //System.out.println(cal);
+            if(day>=cal) ans.add(idx);
+            idx++;
         }
         
         return ans.stream().mapToInt(Integer::intValue).toArray();
-    }
-    public int[] toInt(String[] s){
-        int[] nows = new int[3];
-        for(int i=0; i<s.length; i++){
-            nows[i]=Integer.parseInt(s[i]);
-        }
-        return nows;
-    }
-    public boolean cal(int[] num, int n){
-        
-        int sum = num[0]*28*12+(num[1]+n)*28+num[2]-1;
-        int s_now = now[0]*28*12+now[1]*28+now[2];
-        
-        return sum<s_now;
     }
 }
