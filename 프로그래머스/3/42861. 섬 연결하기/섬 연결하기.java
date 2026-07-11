@@ -1,59 +1,68 @@
 import java.util.*;
+class Node{
+    int num;
+    int cost;
+    public Node(int num, int cost){
+        this.num=num;
+        this.cost=cost;
+    }
+}
 
 class Solution {
-    
-    
     public int solution(int n, int[][] costs) {
-        int answer = 0;
-        HashMap<Integer,List<int[]>> graph = new HashMap<>();
         
-        for(int[] cost : costs){
-            if(!graph.containsKey(cost[0])){
-                List<int[]> list = new ArrayList<>();
-                list.add(new int[]{cost[1],cost[2]});
-                graph.put(cost[0],list);
-                
+        int answer = Integer.MAX_VALUE;
+        HashMap<Integer,List<Node>> map = new HashMap<>();
+        //간선 정보 저장
+        for(int[] c : costs){
+            if(map.containsKey(c[0])){
+                map.get(c[0]).add(new Node(c[1],c[2]));
             }
             else{
-                graph.get(cost[0]).add(new int[]{cost[1],cost[2]});
+                List<Node> list = new ArrayList<>();
+                list.add(new Node(c[1],c[2]));
+                map.put(c[0],list);
             }
-            if(!graph.containsKey(cost[1])){
-                List<int[]> list = new ArrayList<>();
-                list.add(new int[]{cost[0],cost[2]});
-                graph.put(cost[1],list);
+            if(map.containsKey(c[1])){
+                map.get(c[1]).add(new Node(c[0],c[2]));
             }
             else{
-                graph.get(cost[1]).add(new int[]{cost[0],cost[2]});
+                List<Node> list = new ArrayList<>();
+                list.add(new Node(c[0],c[2]));
+                map.put(c[1],list);
             }
-        }
-        //간선 오름차순 정렬
-        for(int key : graph.keySet()){
-            Collections.sort(graph.get(key),(p1,p2)->p1[1]-p2[1]);
-        }
-        
-        //시작노드는 아무거나 선택
-        //for(int key : graph.keySet()){
-            PriorityQueue<int[]> pq = new PriorityQueue<>((p1,p2)-> p1[1] - p2[1]);
-            //현재노드 번호, 누적 비용 저장
-            for(int[] land : graph.get(costs[0][0])){
-                pq.add(new int[]{land[0], land[1]});
-            }
-            HashSet<Integer> visited = new HashSet<>();
-            visited.add(costs[0][0]);
             
+        }
+       
+        
+        int[][] dist = new int[100][100];
+        for(int start : map.keySet()){
+            boolean[] visited = new boolean[100]; 
+            //[섬 번호, cost]
+            PriorityQueue<int[]> pq = new PriorityQueue<>((p1,p2)->p1[1]-p2[1]);
+            pq.add(new int[]{start,0});
             while(!pq.isEmpty()){
                 int[] nd = pq.poll();
-                //if(visited.size()==n) break;
-                if(visited.contains(nd[0])) continue;
-                answer+=nd[1];
-                visited.add(nd[0]);
-                for(int[] list : graph.get(nd[0])){
-                    if(visited.contains(list[0])) continue;
-                    pq.add(new int[]{list[0], list[1]});
-                }
+                visited[nd[0]]=true;
+                for(Node next : map.get(nd[0])){
+                    if(visited[next.num]) continue;
+                    if(dist[start][next.num]==0 || dist[start][next.num]>next.cost){
+                        dist[start][next.num]=next.cost;
+                        pq.add(new int[]{next.num,next.cost});
+                    }
 
+                }
             }
-        //}
+        }
+        
+        for(int start : map.keySet()){
+            int total=0;
+            for(int i=0; i<dist.length; i++){
+                if(dist[start][i]!=0) total+=dist[start][i];
+                
+            }    
+            if(answer>total) answer = total;
+        }
         
         return answer;
     }
