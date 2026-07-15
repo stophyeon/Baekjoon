@@ -1,40 +1,32 @@
+import java.util.*;
+
 class Solution {
     boolean[] visited;
-    int answer = 0;
-    int[][] map;
-    int size;
+    int[][] edge;
+    
     public int solution(int n, int[][] computers) {
-        visited=new boolean[n];
-        map=new int[n][n];
-        size=n;
+        visited = new boolean[n];
+        edge = computers;
+        int answer = 0;
         for(int i=0; i<n; i++){
-            for(int j=0; j<n; j++){
-                if(i==j) map[i][j]=0;
-                else{map[i][j]=computers[i][j];}
-            }
+            if(visited[i]) continue;
+            visited[i] = true;
+            dfs(i);
+            answer++;
         }
-        for(int i=0; i<n; i++){
-            if(!visited[i]){
-                dfs(i);
-                answer++;
-            }
-            
-        }
-        
-        
         return answer;
     }
-    void dfs(int k){
+    
+    public void dfs(int start){
         
-            int count=0;
-            for(int i=0; i<size; i++){
-                if(map[k][i]==1 && !visited[i]){
-                    visited[k]=true;
-                    dfs(i);
-                }
-                else{count++;}
+        for(int i =0; i<edge[start].length; i++){
+            if(i==start) continue;
+            if(edge[start][i]==1 && !visited[i]){
+                visited[i] =true;
+                dfs(i);
             }
-            if(count==size) visited[k]=true;
+        }
         
     }
+    
 }
