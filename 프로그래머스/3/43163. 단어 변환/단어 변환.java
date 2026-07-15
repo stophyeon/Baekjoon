@@ -1,43 +1,44 @@
 import java.util.*;
+
 class Solution {
-    String[] dic;
-    int answer = 51;
-    int len;
-    String ans;
-    public int solution(String begin, String target, String[] words) {
-        int count=0;
-        len=words.length;
-        dic = words;
-        ans=target;
-        for(String word : words){
-            if(target.equals(word)){count++;}
+    public class Node{
+        String s;
+        int cnt;
+        public Node(String s, int cnt){
+            this.s=s;
+            this.cnt=cnt;
         }
-        if(count==0){return 0;}
-        boolean[] visited = new boolean[words.length];
-        dfs(begin,0,visited);
-        return answer;
     }
-    void dfs(String word,int count,boolean[] visited){
-        if(word.equals(ans) && count<answer){answer=count;}
-        boolean[] visit = Arrays.copyOf(visited,len);
-        for(int i=0; i<len; i++){
-            if(contain(dic[i],word)&&!visit[i]){
-                visit[i]=true;
-                System.out.println(dic[i]);
-                dfs(dic[i],count+1,visit);
+    public int solution(String begin, String target, String[] words) {
+        int answer = 0;
+        PriorityQueue<Node> pq = new PriorityQueue<>((n1,n2)->n1.cnt-n2.cnt);
+        HashMap<String,Integer> visited = new HashMap<>();
+        pq.add(new Node(begin,0));
+        visited.put(begin,1);
+        while(!pq.isEmpty()){
+            Node nd = pq.poll();
+            if(nd.s.equals(target)){
+                answer=nd.cnt;
+                break;
+            }
+            for(String w : words){
+                if(!diff(nd.s,w)) continue;
+                if(visited.containsKey(w)) continue;
+                pq.add(new Node(w,nd.cnt+1));
+                visited.put(w,1);
             }
         }
+        return answer;
     }
-    boolean contain(String s1,String s2){
-        int count=0;
-        String[] arr1 = s1.split("");
-        
-        String[] arr2 = s2.split("");
-        
-        for(int i=0; i<arr1.length; i++){
-            if(arr1[i].equals(arr2[i])){count++;}
+    
+    public boolean diff(String s1, String s2){
+        int total=0;
+        for(int i=0; i<s1.length(); i++){
+            if(s1.charAt(i)!=s2.charAt(i)){
+                total++;
+                if(total>1) return false;
+            }
         }
-        if(count==arr1.length-1) return true;
-        else{ return false;}
+        return true;
     }
 }
