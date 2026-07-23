@@ -1,78 +1,67 @@
 import java.util.*;
 class Solution {
-    int[] dx = {1,0,-1,0};
-    int[] dy = {0,1,0,-1};
-    int ix;
-    int iy;
-    int answer = Integer.MAX_VALUE;
-    int[][] map=new int[102][102];
-    int[][] loc;
-    public class Node{
-        int x;
-        int y;
-        int d;
-        public Node(int x, int y, int d){
-            this.x=x;
-            this.y=y;
-            this.d=d;
-        }
-    }
+    int[][] map = new int[102][102];
+    int[] dr = {-1,1,0,0};
+    int[] dc = {0,0,-1,1};
     
     public int solution(int[][] rectangle, int characterX, int characterY, int itemX, int itemY) {
-        ix=itemX*2;
-        iy=itemY*2;
-        loc=new int[rectangle.length][4];
-        int cnt=0;
-        for(int[] rec : rectangle){
-            loc[cnt][0]=rec[0]*2+1;
-            loc[cnt][1]=rec[2]*2-1;
-            loc[cnt][2]=rec[1]*2+1;
-            loc[cnt][3]=rec[3]*2-1;
-            for(int i=rec[0]*2; i<=rec[2]*2; i++){
-                map[rec[1]*2][i]=1;
-                map[rec[3]*2][i]=1;
-            }
-            
-            for(int i=rec[1]*2; i<=rec[3]*2; i++){
-                map[i][rec[0]*2]=1;
-                map[i][rec[2]*2]=1;
-            }
-            cnt++;
-        }
-        
-        for(int[] l : loc){
-            for(int i=l[0]; i<=l[1]; i++){
-                for(int j=l[2]; j<=l[3]; j++){
-                    map[j][i]=0;
+        int answer = 0;
+        //높이, 너비
+        int h,w=0;
+        //테두리 외 공간 저장
+        //[우상단 r,우상단 c, h-2, w-2]
+       for (int[] rec : rectangle) {
+            int x1 = rec[0] * 2;
+            int y1 = rec[1] * 2;
+            int x2 = rec[2] * 2;
+            int y2 = rec[3] * 2;
+
+            for (int y = y1; y <= y2; y++) {
+                for (int x = x1; x <= x2; x++) {
+                    if (y > y1 && y < y2 && x > x1 && x < x2) {
+                        map[y][x] = 2;
+                    }
+                    else if (map[y][x] != 2) {
+                        map[y][x] = 1;
+                    }
                 }
             }
         }
-        //for(int i=0; i<50; i++){
-        //    for(int j=0; j<50; j++){
-        //        System.out.print(map[i][j]);
-        //       System.out.print(" ");
-        //    }
-        //    System.out.println();
-        //}
-        bfs(characterX*2,characterY*2);
-        return answer/2;
-    }
-    public void bfs(int x, int y){
+        
+        
+        int sx = characterX * 2;
+        int sy = characterY * 2;
+        int ex = itemX * 2;
+        int ey = itemY * 2;
         boolean[][] visited = new boolean[102][102];
-        visited[y][x]=true;
-        Queue<Node> q = new LinkedList<>();
-        q.add(new Node(x,y,0));
-        while(!q.isEmpty()){
-            Node n = q.poll();
-            if(n.x==ix && n.y==iy) {answer=n.d; break;}
+        PriorityQueue<int[]> pq = new PriorityQueue<>((p1,p2)->p1[2]-p2[2]);
+        pq.add(new int[]{sx,sy,0});
+        visited[sy][sx]=true;
+        
+        while(!pq.isEmpty()){
+            int[] node = pq.poll();
+            if(node[0]==ex&&node[1]==ey){
+                answer = node[2]/2;
+                break;
+            }
             for(int i=0; i<4; i++){
-                int nx = n.x+dx[i];
-                int ny = n.y+dy[i];
+                int nx = node[0]+dr[i];
+                int ny = node[1]+dc[i];
+                if(!inRange(nx,ny)) continue;
                 if(visited[ny][nx]) continue;
-                if(map[ny][nx]==0) continue;
+                if(map[ny][nx]!=1) continue;
+                
+                pq.add(new int[]{nx,ny,node[2]+1});
                 visited[ny][nx]=true;
-                q.add(new Node(nx,ny,n.d+1));
             }
         }
+        
+        return answer;
     }
+    
+    public boolean inRange(int r, int c){
+        return r>=0&&c>=0&&r<102&&c<102;
+    }
+    
+    
 }
