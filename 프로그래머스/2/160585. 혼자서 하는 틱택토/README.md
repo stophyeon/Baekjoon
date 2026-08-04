@@ -1,10 +1,10 @@
 # [level 2] 혼자서 하는 틱택토 - 160585 
 
-[문제 링크](https://school.programmers.co.kr/learn/courses/30/lessons/160585) 
+[문제 링크](https://school.programmers.co.kr/learn/courses/30/lessons/160585#qna) 
 
 ### 성능 요약
 
-메모리: 80.7 MB, 시간: 0.26 ms
+메모리: 82.9 MB, 시간: 0.20 ms
 
 ### 구분
 
@@ -16,7 +16,7 @@
 
 ### 제출 일자
 
-2024년 12월 13일 19:57:58
+2026년 08월 04일 11:15:35
 
 ### 문제 설명
 
