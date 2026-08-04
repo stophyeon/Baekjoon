@@ -1,69 +1,72 @@
 import java.util.*;
-class Solution {
-    public class Plan{
-        String name;
-        int time;
-        public Plan(String name, int time){
-            this.name=name;
-            this.time=time;
-        }
+class Work{
+    String name;
+    int start;
+    int rest;
+    public Work(String name, int start, int rest){
+        this.name=name;
+        this.rest=rest;
+        this.start=start;
     }
-    HashMap<Integer,Plan> map = new HashMap<>();
-    List<Integer> next = new ArrayList<>();
-    Stack<Plan> st = new Stack<>();
+}
+class Solution {
     public String[] solution(String[][] plans) {
+        int n = plans.length;
+        String[] answer = new String[n];
+        PriorityQueue<Work> pq = new PriorityQueue<>((p1,p2)->p1.start-p2.start);
+        Stack<Work> remain = new Stack<>();
         
-        String[] answer = new String[plans.length];
-        String ans="";
-        for(int i=0; i<plans.length; i++){
-            String[] time = plans[i][1].split(":");
-            int h = Integer.parseInt(time[0])*60;
-            int m = Integer.parseInt(time[1]);
-            next.add(h+m);
-            map.put(h+m,new Plan(plans[i][0],Integer.parseInt(plans[i][2])));
+        for(String[] plan : plans){
+            String[] s = plan[1].split(":");
+            pq.add(new Work(plan[0],Integer.parseInt(s[0])*60+Integer.parseInt(s[1]),Integer.parseInt(plan[2])));
         }
-        Collections.sort(next,(t1,t2)->t1-t2);
         
-        for(int i=0; i<next.size()-1; i++){
-            int t=next.get(i);
-            Plan p=map.get(next.get(i));
-            if(p.time+next.get(i)==next.get(i+1)){
-                ans+=p.name+",";
-                continue;
-            }
-            else if(p.time+next.get(i)<next.get(i+1)){
-                ans+=p.name+",";
-                t+=p.time;
-                if(!st.isEmpty()){
-                    while(t<next.get(i+1)){
-                        Plan rest = st.pop();
-                        if(t+rest.time>next.get(i+1)){
-                            rest.time-=next.get(i+1)-t;
-                            st.push(rest);
+        Work now = null;
+        int idx=0;
+        while(!pq.isEmpty()){
+            Work next = pq.poll();
+            if(now!=null){
+                int t = next.start-now.start;
+                //다음 과제 시작시간에 현재 과제가 안끝났을 경우
+                if(now.rest>t){
+                    remain.push(new Work(now.name,now.start,now.rest-t));
+                }
+                //다음 과제 시작시간에 현재 과제가 끝났을 경우
+                else if(now.rest==t){
+                    answer[idx]=now.name;
+                    idx++;
+                }
+                //다음 과제 시작시간 전에 현재 과제가 끝났을 경우
+                else{
+                    answer[idx]=now.name;
+                    idx++;
+                    //Stack의 남아있는 과제를 함
+                    int r = 0;
+                    while(!remain.isEmpty()){
+                        Work rt = remain.peek();
+                        if(t<now.rest+r+rt.rest) {
+                            rt.rest -= t-now.rest-r;
                             break;
                         }
-                        t+=rest.time;
-                        ans+=rest.name+",";
-                        if(st.isEmpty()) break;
+                        r+=rt.rest;
+                        answer[idx]=rt.name;
+                        idx++;
+                        remain.pop();
                     }
                 }
             }
-            else{
-                p.time-=next.get(i+1)-next.get(i);
-                st.push(p);
-            }
+            now=next;
         }
-        ans+=map.get(next.get(next.size()-1)).name+",";
-        // answer[idx]=map.get(next.get(next.size()-1)).name;
-        // idx++;
-        while(!st.isEmpty()){
-            Plan p = st.pop();
-            ans+=p.name+",";
-            // answer[idx]=p.name;
-            // idx++;
+        if(now!=null){
+            answer[idx]=now.name;
+            idx++;
         }
-        System.out.println(ans);
-        answer=ans.split(",");
+        //새로운 과제 모두 받은 후 남아있는 과제 처리
+        while(!remain.isEmpty()){
+            Work next = remain.pop();
+            answer[idx]=next.name;
+            idx++;
+        }
         return answer;
     }
 }
