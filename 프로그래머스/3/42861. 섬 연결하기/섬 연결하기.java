@@ -1,69 +1,38 @@
 import java.util.*;
-class Node{
-    int num;
-    int cost;
-    public Node(int num, int cost){
-        this.num=num;
-        this.cost=cost;
-    }
-}
 
 class Solution {
+    HashMap<Integer,Integer> parent = new HashMap<>();
     public int solution(int n, int[][] costs) {
-        
-        int answer = Integer.MAX_VALUE;
-        HashMap<Integer,List<Node>> map = new HashMap<>();
-        //간선 정보 저장
-        for(int[] c : costs){
-            if(map.containsKey(c[0])){
-                map.get(c[0]).add(new Node(c[1],c[2]));
-            }
-            else{
-                List<Node> list = new ArrayList<>();
-                list.add(new Node(c[1],c[2]));
-                map.put(c[0],list);
-            }
-            if(map.containsKey(c[1])){
-                map.get(c[1]).add(new Node(c[0],c[2]));
-            }
-            else{
-                List<Node> list = new ArrayList<>();
-                list.add(new Node(c[0],c[2]));
-                map.put(c[1],list);
-            }
-            
-        }
-       
-        
-        int[][] dist = new int[100][100];
-        for(int start : map.keySet()){
-            boolean[] visited = new boolean[100]; 
-            //[섬 번호, cost]
-            PriorityQueue<int[]> pq = new PriorityQueue<>((p1,p2)->p1[1]-p2[1]);
-            pq.add(new int[]{start,0});
-            while(!pq.isEmpty()){
-                int[] nd = pq.poll();
-                visited[nd[0]]=true;
-                for(Node next : map.get(nd[0])){
-                    if(visited[next.num]) continue;
-                    if(dist[start][next.num]==0 || dist[start][next.num]>next.cost){
-                        dist[start][next.num]=next.cost;
-                        pq.add(new int[]{next.num,next.cost});
-                    }
-
-                }
-            }
+        //MST - 최소비용으로 순환없이 모두 이어지게 하는 알고리즘
+        //크루스칼 - 간선중심
+        //UNION-FIND - 노드중심
+        // 1. 간선 비용 오름차순으로 정렬
+        // 2. 간선 선택하면서 순환 발생 시 버림 
+        int answer = 0;
+        PriorityQueue<int[]> pq = new PriorityQueue<>((p1,p2)->p1[2]-p2[2]);
+        for(int[] cost : costs){
+            pq.add(cost);
+            parent.put(cost[0],cost[0]);
+            parent.put(cost[1],cost[1]);
         }
         
-        for(int start : map.keySet()){
-            int total=0;
-            for(int i=0; i<dist.length; i++){
-                if(dist[start][i]!=0) total+=dist[start][i];
-                
-            }    
-            if(answer>total) answer = total;
+        while(!pq.isEmpty()){
+            int[] edge = pq.poll();
+            if(find(edge[1])!=find(edge[0])) {
+                union(edge[0],edge[1]);
+                answer+=edge[2];
+            }
         }
-        
         return answer;
+    }
+    
+    public int find(int nd){
+        if(parent.get(nd)==nd) return nd;
+        parent.put(nd,find(parent.get(nd)));
+        return parent.get(nd);
+    }
+    
+    public void union(int a, int b){
+        parent.put(find(b),find(a));
     }
 }
